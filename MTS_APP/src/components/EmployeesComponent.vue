@@ -3,7 +3,23 @@
     export default {
         data(){
             return{
-                workers: store.state.employees
+                workers: store.state.employees,
+                selectedEmployee: null
+            }
+        },
+        methods:{
+            showAllEmployeeDetails(employeeId){
+               this.selectedEmployee = this.workers.find(worker => worker.employeeId === employeeId)
+                // if(employeeToShow){
+                //     const popUp = document.createElement('fieldset')
+                //     popUp.style.position = "absolute"
+                //     popUp.style.top = "0"
+                //     popUp.innerHTML = `
+                //                         <p>{{employeeToShow.employmentHistory}}</p>
+                //     `
+                //     console.log(popUp);
+                    
+                // }
             }
         }
     }
@@ -15,7 +31,7 @@
     </ul> -->
 
     <div class="cards">
-        <div class="employee mb-2 border-top pt-3" v-for="employee in workers" :key="employee.employeeId">
+        <div class="employee mb-2 border-top pt-3" v-for="employee in workers" :key="employee.employeeId" @click="showAllEmployeeDetails(employee.employeeId)">
             <div class="d-flex">
                 <i class="fa-solid fa-user-tie mr-2"></i> 
                 <div class="nameNposition mr-6">
@@ -31,14 +47,30 @@
                 </div>
                 <p class="btn btn-primary right-0">{{ employee.department }}</p>
             </div>
+            <fieldset v-if="selectedEmployee && selectedEmployee.employeeId === employee.employeeId" class="popup">
+                <p>{{ selectedEmployee.employmentHistory }}</p>
+            </fieldset>
         </div>
     </div>
 
 </template>
 
 <style>
+.popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: white;
+    padding: 1rem;
+    border: 1px solid black;
+    z-index: 999;
+}
+
     .employee{
         position: relative;
+    }
+    .employee:hover{
+        background-color: rgb(218, 218, 248);
     }
     .right-0{
         position: absolute;
