@@ -37,8 +37,9 @@
           <p><strong>Deduction Rate (per leave unit):</strong> R62.5</p>
           <p><strong>Calculation Note:</strong> Final Salary ≈ Monthly Salary - (Leave Deductions * 62.5)</p>
                <button @click="generatePayslip(selectedEmployee)" class="payslip-btn btn btn-warning">
-                Generate Payslip
-              </button>
+  Generate Payslip
+</button>
+
         </div>
       </div>
     </div>
@@ -48,6 +49,7 @@
 <script>
 import store from '@/store';
 import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default {
   name: 'PayrollApp',
@@ -65,22 +67,35 @@ export default {
     this.selectedEmployeeId = null;
   },
   generatePayslip(employee) {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text("Payslip", 105, 20, null, null, "center");
-    doc.setFontSize(12);
-    doc.text(`Employee ID: ${employee.employeeId}`, 20, 40);
-    doc.text(`Hours Worked: ${employee.hoursWorked}`, 20, 50);
-    doc.text(`Leave Deductions: ${employee.leaveDeductions}`, 20, 60);
-    doc.text(`Monthly Salary: R${employee.salary || "N/A"}`, 20, 70);
-    doc.text(`Final Salary: R${employee.finalSalary}`, 20, 80);
-    doc.text(`Working Rate (per hour): R350`, 20, 90);
-    doc.text(`Deduction Rate (per leave unit): R62.5`, 20, 100);
-    doc.text(`Calculation Note: Final Salary ≈ Monthly Salary - (Leave Deductions * 62.5)`, 20, 110);
-    doc.save(`Payslip_${employee.employeeId}.pdf`);
-  }
-},
+      const doc = new jsPDF();
 
+      // Initialize autoTable plugin
+      autoTable(doc, {   // <- pass doc as first argument
+        startY: 30,
+        theme: 'striped',
+        head: [['Field', 'Value']],
+        body: [
+          ['Employee ID', employee.employeeId],
+          ['Employee Name', employee.name],
+          ['Hours Worked', employee.hoursWorked],
+          ['Leave Deductions', employee.leaveDeductions],
+          ['Monthly Salary', employee.salary ? `R${employee.salary}` : 'N/A'],
+          ['Final Salary', `R${employee.finalSalary}`],
+          ['Working Rate (per hour)', 'R350'],
+          ['Deduction Rate (per leave unit)', 'R62.5'],
+          ['Calculation Note', 'Final Salary ≈ Monthly Salary - (Leave Deductions * 62.5)']
+        ],
+        styles: { fontSize: 12, cellPadding: 4 },
+        headStyles: { fillColor: [102, 126, 234], textColor: 255, fontStyle: 'bold' },
+        alternateRowStyles: { fillColor: [245, 245, 245] }
+      });
+
+      doc.setFontSize(18);
+      doc.text("Payslip", 105, 20, { align: "center" });
+
+      doc.save(`Payslip_${employee.employeeId}.pdf`);
+    }
+},
   computed: {
   payrollWithNames() {
     const payrolls = store.state.employeesPayRoll || [];
