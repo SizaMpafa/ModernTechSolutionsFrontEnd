@@ -5,26 +5,23 @@ export default {
   props: ["id"],
 
   computed: {
-    employee() {
-      return store.state.employees.find((e) => e.employeeId == this.id);
-    },
-
-    employeeRecord() {
-      return store.getters.toRegister(this.id);
-    },
-
     todayDate() {
       return new Date().toISOString().split("T")[0];
     },
 
     alreadySigned() {
       return store.getters.hasSignedToday(this.id);
+    },
+
+    employeeAttendance() {
+      const employee = store.state.employeesAttendance.find(e => e.employeeId == this.id);
+      return employee ? employee.attendance : [];
     }
   },
 
   data() {
     return {
-      signedStatus: null, // Holds "Present" or "Absent"
+      signedStatus: null,
     };
   },
 
@@ -49,12 +46,18 @@ export default {
 </script>
 
 <template>
-  <div class="mt-4" style="max-width: 450px; margin: auto;">
+  <div class="mt-4" style="max-width: 550px; margin: auto;">
+<RouterLink 
+  :to="`/employee/${id}`"
+  class="back-btn d-inline-flex align-items-center gap-2 mb-3"
+>
+  <i class="bi bi-arrow-left"></i> Back
+</RouterLink>
 
-    <!-- If already signed, show message ONLY -->
+    <!-- Success / Already Signed Message -->
     <div v-if="alreadySigned || signedStatus" class="alert alert-success text-center shadow">
       <strong>Attendance submitted:</strong>
-      <div>{{ todayDate }} - {{ signedStatus || 'Already signed today' }}</div>
+      <div>{{ todayDate }} - {{ signedStatus || "Already signed today" }}</div>
     </div>
 
     <!-- Attendance Card -->
@@ -81,6 +84,40 @@ export default {
         >
           Absent
         </button>
+
+      </div>
+    </div>
+
+    <!-- Attendance History -->
+    <div class="card shadow mt-4">
+      <div class="card-header bg-secondary text-white text-center fw-bold">
+        Attendance History
+      </div>
+
+      <div class="card-body">
+
+        <div v-if="employeeAttendance.length === 0" class="text-center text-muted">
+          No attendance records yet.
+        </div>
+
+        <ul v-else class="list-group">
+          <li
+            v-for="day in employeeAttendance"
+            :key="day.date"
+            class="list-group-item d-flex justify-content-between align-items-center"
+          >
+            <span>{{ day.date }}</span>
+
+            <span
+              :class="{
+                'badge bg-success': day.status === 'Present',
+                'badge bg-danger': day.status === 'Absent'
+              }"
+            >
+              {{ day.status }}
+            </span>
+          </li>
+        </ul>
 
       </div>
     </div>

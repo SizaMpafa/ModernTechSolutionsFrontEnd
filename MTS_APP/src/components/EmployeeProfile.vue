@@ -12,6 +12,12 @@ export default {
 </script>
 
 <template>
+  <RouterLink 
+    :to="`/employee/${id}`"
+    class="back-btn d-inline-flex align-items-center gap-2 mb-3"
+  >
+    <i class="bi bi-arrow-left"></i> Back
+  </RouterLink>
   <div class="container mt-5 d-flex justify-content-center">
     <div class="card shadow-lg p-4" style="width: 450px; border-radius: 20px;">
 

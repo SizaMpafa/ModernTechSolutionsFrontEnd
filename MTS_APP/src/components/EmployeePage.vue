@@ -24,7 +24,7 @@ export default {
             <a class="nav-link active" aria-current="page" href="#"><RouterLink :to="{ name: 'EmployeeRegister', params: { id: employee.employeeId } }">Register</RouterLink></a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="#">Request Leave</a>
+            <a class="nav-link" href="#"><RouterLink :to="{name: 'EmployeeBookings', params: {id: employee.employeeId}}">Bookings</RouterLink></a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#"><RouterLink :to="{ name: 'EmployeeProfile', params: { id: employee.employeeId } }">Profile</RouterLink></a>

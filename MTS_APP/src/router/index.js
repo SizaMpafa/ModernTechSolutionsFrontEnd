@@ -9,6 +9,7 @@ import EmployeeView from "@/views/EmployeeView.vue";
 import PayrollView from '@/views/PayrollView.vue'
 import ProfileView from "@/views/ProfileView.vue";
 import RegisterView from "@/views/RegisterView.vue";
+import LeaveView from "@/views/LeaveView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,6 +45,12 @@ const router = createRouter({
               path: "register",
               name: "EmployeeRegister",
               component: RegisterView,
+              props: true
+            },
+            {
+              path: "bookings",
+              name: "EmployeeBookings",
+              component: LeaveView,
               props: true
             }
           ]
