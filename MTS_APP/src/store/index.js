@@ -3,23 +3,20 @@ import employeesData from "./employee_info.json";
 import attendanceData from "./attendance.json";
 import payrollData from "./payroll_data.json";
 
-function loadLocalAttendance() {
-  const saved = localStorage.getItem("attendanceData");
+// Always load from localStorage if available
+function loadAttendance() {
+  const saved = localStorage.getItem("employeesAttendance");
   return saved ? JSON.parse(saved) : attendanceData.attendanceAndLeave;
 }
 
 export default createStore({
   state: {
     employees: employeesData.employeeInformation,
-    employeesAttendance: loadLocalAttendance(),
+    employeesAttendance: loadAttendance(),
     employeesPayRoll: payrollData.payrollData,
   },
 
   getters: {
-    toRegister: (state) => (id) => {
-      return state.employeesAttendance.find((e) => e.employeeId == id);
-    },
-
     hasSignedToday: (state) => (id) => {
       const employee = state.employeesAttendance.find((e) => e.employeeId == id);
       if (!employee) return false;
@@ -30,24 +27,59 @@ export default createStore({
   },
 
   mutations: {
+    // Save both to Vuex AND localStorage
+    saveAttendance(state) {
+      localStorage.setItem(
+        "employeesAttendance",
+        JSON.stringify(state.employeesAttendance)
+      );
+    },
+
     addRegister(state, payload) {
       const { id, newAttendanceRecord } = payload;
-
-      const employee = state.employeesAttendance.find(
-        (e) => e.employeeId == id
-      );
+      const employee = state.employeesAttendance.find(e => e.employeeId == id);
 
       if (employee) {
         employee.attendance.push(newAttendanceRecord);
 
-        // Save updated attendance to localStorage
-        localStorage.setItem(
-          "attendanceData",
-          JSON.stringify(state.employeesAttendance)
-        );
+        // sync Vuex + LocalStorage
+        this.commit("saveAttendance");
       }
     },
+
+    addRequest(state, payload) {
+      const { id, newLeaveRequestRecord } = payload;
+      const employee = state.employeesAttendance.find(e => e.employeeId == id);
+
+      if (employee) {
+        employee.leaveRequests.push(newLeaveRequestRecord);
+
+        // sync Vuex + LocalStorage
+        this.commit("saveAttendance");
+      }
+    },
+
+    updateLeaveStatus(state, { employeeId, newStatus }) {
+      const employee = state.employeesAttendance.find(e => e.employeeId === employeeId);
+      if (!employee) return;
+
+      employee.leaveRequests.forEach(req => {
+        if (req.status === "Pending") {
+          req.status = newStatus; // "Approved" or "Declined"
+        }
+      });
+
+      // sync Vuex + LocalStorage
+      this.commit("saveAttendance");
+    }
   },
 
-  actions: {},
+  actions: {
+    approveLeave({ commit }, employeeId) {
+      commit("updateLeaveStatus", { employeeId, newStatus: "Approved" });
+    },
+    declineLeave({ commit }, employeeId) {
+      commit("updateLeaveStatus", { employeeId, newStatus: "Declined" });
+    }
+  }
 });

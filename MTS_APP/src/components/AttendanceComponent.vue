@@ -1,55 +1,15 @@
 <script>
-import store from '@/store';
-
 export default {
-  data() {
-    return {
-      attendance: JSON.parse(localStorage.getItem("employeesAttendance")) || store.state.employeesAttendance
-    };
-  },
-  methods:{
-    approveLeaveRequest(employeeId) {
-    const employee = this.attendance.find(emp => emp.employeeId === employeeId);
-    if (!employee) return;
-
-    employee.leaveRequests.forEach(request => {
-        if (request.status === "Pending") {
-            request.status = "Approved";
-        }
-    });
-
-    // Save updated attendance to localStorage
-    localStorage.setItem("employeesAttendance", JSON.stringify(this.attendance));
-},
-
-declineLeaveRequest(employeeId) {
-        const employee = this.attendance.find(emp => emp.employeeId === employeeId);
-    if (!employee) return;
-
-    employee.leaveRequests.forEach(request => {
-        if (request.status === "Pending") {
-            request.status = "Declined";
-        }
-    });
-
-    // Save updated attendance to localStorage
-    localStorage.setItem("employeesAttendance", JSON.stringify(this.attendance));
-}
-  }
-  ,
-
   computed: {
-    // return employees who have at least 1 absent day
+    attendance() {
+      return this.$store.state.employeesAttendance;
+    },
+
     absentEmployees() {
       return this.attendance
         .map(emp => {
-          // find all absent days
           const absentDays = emp.attendance.filter(day => day.status === "Absent");
-
-          return {
-            ...emp,
-            absentDays
-          };
+          return { ...emp, absentDays };
         })
         .filter(emp => emp.absentDays.length > 0);
     },
@@ -57,42 +17,37 @@ declineLeaveRequest(employeeId) {
     presentEmployees() {
       return this.attendance
         .map(emp => {
-          // find all absent days
           const presentDays = emp.attendance.filter(day => day.status === "Present");
-
-          return {
-            ...emp,
-            presentDays
-          };
+          return { ...emp, presentDays };
         })
         .filter(emp => emp.presentDays.length > 0);
-    }, 
-    approvedLeave(){
-        return this.attendance.map(emp => {
-            const leaveDays = emp.leaveRequests.filter(day => day.status === "Approved")
-            return {
-                ...emp,
-                leaveDays
-            }
-        }).filter(emp => emp.leaveDays.length > 0)
     },
-    pendingLeave(){
-        return this.attendance.map(emp => {
-            const UnconfirmedLeaveDays = emp.leaveRequests.filter(day => day.status === "Pending")
-            return {
-                ...emp,
-                UnconfirmedLeaveDays
-            }
-        }).filter(emp => emp.UnconfirmedLeaveDays.length > 0)
+
+    approvedLeave() {
+      return this.attendance
+        .map(emp => {
+          const leaveDays = emp.leaveRequests.filter(day => day.status === "Approved");
+          return { ...emp, leaveDays };
+        })
+        .filter(emp => emp.leaveDays.length > 0);
     },
-    declinedLeave(){
-        return this.attendance.map(emp => {
-            const declinedDays = emp.leaveRequests.filter(day => day.status === "Declined")
-            return {
-                ...emp,
-                declinedDays
-            }
-        }).filter(emp => emp.declinedDays.length > 0)
+
+    pendingLeave() {
+      return this.attendance
+        .map(emp => {
+          const UnconfirmedLeaveDays = emp.leaveRequests.filter(day => day.status === "Pending");
+          return { ...emp, UnconfirmedLeaveDays };
+        })
+        .filter(emp => emp.UnconfirmedLeaveDays.length > 0);
+    },
+
+    declinedLeave() {
+      return this.attendance
+        .map(emp => {
+          const declinedDays = emp.leaveRequests.filter(day => day.status === "Declined");
+          return { ...emp, declinedDays };
+        })
+        .filter(emp => emp.declinedDays.length > 0);
     }
   }
 };
@@ -100,120 +55,118 @@ declineLeaveRequest(employeeId) {
 
 
 <template>
-    <div class="parent d-flex">
-        <div class="absent">
-            <div class="cards">
-                <h1 class="text-center">
-                    Absent
-                </h1>
-                <div class="showAttendance">
-                    <div class="card" v-for="emp in absentEmployees" :key="emp.employeeId">
-                        <h5 class="card-header color-red">{{ emp.name }}</h5>
-                        <div class="card-body">
-                            <h6>Absent Days:</h6>
-                                <ul>
-                                <li v-for="day in emp.absentDays" :key="day.date">
-                                    {{ day.date }}
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div class="parent d-flex">
 
-        <div class="present">
-            <div class="cards">
-                <h1 class="text-center">
-                    Present
-                </h1>
-                <div class="showAttendance">
-                    <div class="card" v-for="em in presentEmployees" :key="em.employeeId">
-                        <h5 class="card-header color-green">{{ em.name }}</h5>
-                    <div class="card-body">
-                        <h6>Present Days:</h6>
-                        <ul>
-                            <li v-for="day in em.presentDays" :key="day.date">
-                                {{ day.date }}
-                            </li>
-                        </ul>
-                </div>
-                    </div>
-                </div>
+    <!-- ABSENT SECTION -->
+    <div class="absent">
+      <div class="cards">
+        <h1 class="text-center">Absent</h1>
+        <div class="showAttendance">
+          <div class="card" v-for="emp in absentEmployees" :key="emp.employeeId">
+            <h5 class="card-header color-red">{{ emp.name }}</h5>
+            <div class="card-body">
+              <h6>Absent Days:</h6>
+              <ul>
+                <li v-for="day in emp.absentDays" :key="day.date">{{ day.date }}</li>
+              </ul>
             </div>
+          </div>
         </div>
-
-        <div class="approved">
-            <div class="cards">
-                <h1 class="text-center">
-                    Aproved Leave
-                </h1>
-                <div class="showAttendance">
-                    <div class="card" v-for="emp in approvedLeave" :key="emp.employeeId">
-                        <h5 class="card-header color-green">{{ emp.name }}</h5>
-                    <div class="card-body">
-                        <h6>Leave Days:</h6>
-                        <ul>
-                            <li v-for="day in emp.leaveDays" :key="day.date">
-                                {{ day.date }}
-                                <br>
-                                {{ day.reason }}
-                            </li>
-                        </ul>
-                </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="pending">
-            <div class="cards">
-                <h1 class="text-center">
-                    Pending Leave
-                </h1>
-                <div class="showAttendance">
-                    <div class="card" v-for="emp in pendingLeave" :key="emp.employeeId">
-                        <h5 class="card-header color-yellow">{{ emp.name }}</h5>
-                    <div class="card-body">
-                        <h6>Leave Days:</h6>
-                        <ul>
-                            <li v-for="day in emp.UnconfirmedLeaveDays" :key="day.date">
-                                {{ day.date }}
-                                <br>
-                                {{ day.reason }}
-                                <button class="btn btn-primary" @click="approveLeaveRequest(emp.employeeId)">Approve Leave</button>
-                                <button class="btn btn-warning" @click="declineLeaveRequest(emp.employeeId)">Decline Leave</button>
-                            </li>
-                            
-                        </ul>
-                </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="declined">
-            <div class="cards">
-                <h1 class="text-center">
-                    Declined Leave
-                </h1>
-                <div class="showAttendance">
-                    <div class="card" v-for="emp in declinedLeave" :key="emp.employeeId">
-                        <h5 class="card-header color-red">{{ emp.name }}</h5>
-                    <div class="card-body">
-                        <h6>Leave Days:</h6>
-                        <ul>
-                            <li v-for="day in emp.declinedDays" :key="day.date">
-                                {{ day.date }}
-                            </li>
-                            
-                        </ul>
-                </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
+    <!-- PRESENT SECTION -->
+    <div class="present">
+      <div class="cards">
+        <h1 class="text-center">Present</h1>
+        <div class="showAttendance">
+          <div class="card" v-for="em in presentEmployees" :key="em.employeeId">
+            <h5 class="card-header color-green">{{ em.name }}</h5>
+            <div class="card-body">
+              <h6>Present Days:</h6>
+              <ul>
+                <li v-for="day in em.presentDays" :key="day.date">{{ day.date }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- APPROVED LEAVE SECTION -->
+    <div class="approved">
+      <div class="cards">
+        <h1 class="text-center">Approved Leave</h1>
+        <div class="showAttendance">
+          <div class="card" v-for="emp in approvedLeave" :key="emp.employeeId">
+            <h5 class="card-header color-green">{{ emp.name }}</h5>
+            <div class="card-body">
+              <h6>Leave Days:</h6>
+              <ul>
+                <li v-for="day in emp.leaveDays" :key="day.date">
+                  {{ day.date }} <br />
+                  {{ day.reason }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PENDING LEAVE SECTION -->
+    <div class="pending">
+      <div class="cards">
+        <h1 class="text-center">Pending Leave</h1>
+        <div class="showAttendance">
+          <div class="card" v-for="emp in pendingLeave" :key="emp.employeeId">
+            <h5 class="card-header color-yellow">{{ emp.name }}</h5>
+            <div class="card-body">
+              <h6>Leave Days:</h6>
+              <ul>
+                <li v-for="day in emp.UnconfirmedLeaveDays" :key="day.date">
+
+                  {{ day.date }} <br />
+                  {{ day.reason }}
+
+                  <!-- UPDATED BUTTONS -->
+                  <div class="btn-container">
+                    <button class="btn btn-primary" @click="$store.dispatch('approveLeave', emp.employeeId)">
+                      Approve Leave
+                    </button>
+
+                    <button class="btn btn-warning" @click="$store.dispatch('declineLeave', emp.employeeId)">
+                      Decline Leave
+                    </button>
+                  </div>
+
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DECLINED LEAVE SECTION -->
+    <div class="declined">
+      <div class="cards">
+        <h1 class="text-center">Declined Leave</h1>
+        <div class="showAttendance">
+          <div class="card" v-for="emp in declinedLeave" :key="emp.employeeId">
+            <h5 class="card-header color-red">{{ emp.name }}</h5>
+            <div class="card-body">
+              <h6>Leave Days:</h6>
+              <ul>
+                <li v-for="day in emp.declinedDays" :key="day.date">{{ day.date }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </template>
 
 <style>
