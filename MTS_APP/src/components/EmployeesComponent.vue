@@ -144,16 +144,35 @@
 }
 
 .info-box {
-  flex: 1 1 220px;
+  flex: 1 1 200px; /* shrink more on small screens */
+  min-width: 0; /* allow shrinking below content width */
   background: #f8f9ff;
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #e1e4ff;
+  word-wrap: break-word; /* ensure long text wraps */
 }
 
 .info-box strong {
   font-size: 14px;
   color: #333;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 500px) {
+  .expanded {
+    flex-direction: column;
+  }
+
+  .info-box {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .btn {
+    font-size: 14px;
+    padding: 10px;
+  }
 }
 
 /* Animation */
@@ -167,6 +186,4 @@
     transform: translateY(0);
   }
 }
-
-
 </style>
