@@ -6,6 +6,7 @@ export default{
     this.$store.dispatch('fetchEmployees');
     this.$store.dispatch('fetchAttendance');
     this.$store.dispatch('fetchLeaveRequests');
+    this.$store.dispatch('fetchPayroll');
   }
 
 }

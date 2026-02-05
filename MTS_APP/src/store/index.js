@@ -4,7 +4,8 @@ export default createStore({
   state: {
     employees: [],
     attendance: [],
-    leaveRequests: []
+    leaveRequests: [],
+    payroll: []
   },
 
   getters: {
@@ -41,6 +42,9 @@ export default createStore({
     setLeaveRequests(state, payload) {
       state.leaveRequests = payload;
     },
+    setPayroll(state, payload) {
+      state.payroll = payload;
+    },
     updateLeaveStatus(state, { leave_request_id, status }) {
       const leave = state.leaveRequests.find(
         l => l.leave_request_id === leave_request_id
@@ -69,6 +73,15 @@ export default createStore({
       // BACKEND KEY IS `leave_request`
       commit("setLeaveRequests", response.leave_request);
     },
+    async fetchPayroll({ commit }) {
+      const {payroll} =
+        await (await fetch("http://localhost:1111/payroll")).json();
+
+      // BACKEND KEY IS `leave_request`
+      commit("setPayroll", payroll);
+    },
+
+
 
     async approveLeave({ commit }, leave_request_id) {
       await fetch(

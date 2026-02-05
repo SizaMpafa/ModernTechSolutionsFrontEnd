@@ -3,6 +3,7 @@
     <!-- Employee Cards -->
     <div class="cards">
       <div
+      
   class="employee-card"
   v-for="payroll in payrollWithNames"
   :key="payroll.employeeId"
@@ -47,7 +48,7 @@
 </template>
 
 <script>
-import store from '@/store';
+// import store from '@/store';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -75,12 +76,12 @@ export default {
         theme: 'striped',
         head: [['Field', 'Value']],
         body: [
-          ['Employee ID', employee.employeeId],
+          ['Employee ID', employee.employee_id],
           ['Employee Name', employee.name],
-          ['Hours Worked', employee.hoursWorked],
-          ['Leave Deductions', employee.leaveDeductions],
+          ['Hours Worked', employee.hours_worked],
+          ['Leave Deductions', employee.leave_deductions],
           ['Monthly Salary', employee.salary ? `R${employee.salary}` : 'N/A'],
-          ['Final Salary', `R${employee.finalSalary}`],
+          ['Final Salary', `R${employee.final_salary}`],
           ['Working Rate (per hour)', 'R350'],
           ['Deduction Rate (per leave unit)', 'R62.5'],
           ['Calculation Note', 'Final Salary ≈ Monthly Salary - (Leave Deductions * 62.5)']
@@ -98,11 +99,11 @@ export default {
 },
   computed: {
   payrollWithNames() {
-    const payrolls = store.state.employeesPayRoll || [];
-    const employees = store.state.employees || [];
+    const payrolls =  this.$store.state.payroll;
+    const employees = this.$store.state.employees;
 
     return payrolls.map(payroll => {
-      const employee = employees.find(emp => emp.employeeId === payroll.employeeId);
+      const employee = employees.find(emp => emp.employee_Id === payroll.employee_id);
       return {
         ...payroll,
         name: employee ? employee.name : "Unknown"
@@ -111,7 +112,7 @@ export default {
   },
   selectedEmployee() {
     if (!this.selectedEmployeeId) return null;
-    return this.payrollWithNames.find(p => p.employeeId === this.selectedEmployeeId);
+    return this.payrollWithNames.find(p => p.employee_id === this.selectedEmployeeId);
   }
 }
 
