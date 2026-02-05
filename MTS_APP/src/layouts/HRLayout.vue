@@ -63,7 +63,7 @@ const sidebarOpen = ref(false);
               class="ml-auto bg-indigo-100 text-indigo-700 
                      text-xs font-semibold px-2 py-0.5 rounded-full"
             >
-              {{ EmployeesComponent.data().workers.length }}
+              {{ $store.state.employees.length }}
             </span>
           </RouterLink>
         </li>

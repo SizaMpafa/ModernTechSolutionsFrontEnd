@@ -1,58 +1,60 @@
 <script>
 export default {
   computed: {
-    attendance() {
-      return this.$store.state.employeesAttendance;
+    employees() {
+      return this.$store.getters.employeesAttendanceCombined;
     },
 
     absentEmployees() {
-      return this.attendance
-        .map(emp => {
-          const absentDays = emp.attendance.filter(day => day.status === "Absent");
-          return { ...emp, absentDays };
-        })
-        .filter(emp => emp.absentDays.length > 0);
+      return this.employees
+        .map(emp => ({
+          ...emp,
+          absentDays: emp.attendance.filter(d => d.attendance_status === "Absent")
+        }))
+        .filter(emp => emp.absentDays.length);
     },
 
     presentEmployees() {
-      return this.attendance
-        .map(emp => {
-          const presentDays = emp.attendance.filter(day => day.status === "Present");
-          return { ...emp, presentDays };
-        })
-        .filter(emp => emp.presentDays.length > 0);
+      return this.employees
+        .map(emp => ({
+          ...emp,
+          presentDays: emp.attendance.filter(d => d.attendance_status === "Present")
+        }))
+        .filter(emp => emp.presentDays.length);
     },
 
     approvedLeave() {
-      return this.attendance
-        .map(emp => {
-          const leaveDays = emp.leaveRequests.filter(day => day.status === "Approved");
-          return { ...emp, leaveDays };
-        })
-        .filter(emp => emp.leaveDays.length > 0);
+      return this.employees
+        .map(emp => ({
+          ...emp,
+          leaveDays: emp.leaveRequests.filter(l => l.status === "Approved")     
+        }))
+        .filter(emp => emp.leaveDays.length);
     },
 
     pendingLeave() {
-      return this.attendance
-        .map(emp => {
-          const UnconfirmedLeaveDays = emp.leaveRequests.filter(day => day.status === "Pending");
-          return { ...emp, UnconfirmedLeaveDays };
-        })
-        .filter(emp => emp.UnconfirmedLeaveDays.length > 0);
+      return this.employees
+        .map(emp => ({
+          ...emp,
+          pendingDays: emp.leaveRequests.filter(l => l.status === "Pending")
+        }))
+        .filter(emp => emp.pendingDays.length);
     },
 
     declinedLeave() {
-      return this.attendance
-        .map(emp => {
-          const declinedDays = emp.leaveRequests.filter(day => day.status === "Declined");
-          return { ...emp, declinedDays };
-        })
-        .filter(emp => emp.declinedDays.length > 0);
+      return this.employees
+        .map(emp => ({
+          ...emp,
+          declinedDays: emp.leaveRequests.filter(
+            l => l.status === "Declined" || l.status === "Denied"
+          )
+        }))
+        .filter(emp => emp.declinedDays.length);
     }
+
   }
 };
 </script>
-
 
 <template>
   <div class="parent d-flex">
@@ -124,22 +126,25 @@ export default {
             <div class="card-body">
               <h6>Leave Days:</h6>
               <ul>
-                <li v-for="day in emp.UnconfirmedLeaveDays" :key="day.date">
-
+                <li v-for="day in emp.pendingDays" :key="day.leave_request_id">
                   {{ day.date }} <br />
                   {{ day.reason }}
 
-                  <!-- UPDATED BUTTONS -->
                   <div class="btn-container">
-                    <button class="btn btn-primary" @click="$store.dispatch('approveLeave', emp.employeeId)">
+                    <button
+                      class="btn btn-primary"
+                      @click="$store.dispatch('approveLeave', day.leave_request_id)"
+                    >
                       Approve Leave
                     </button>
 
-                    <button class="btn btn-warning" @click="$store.dispatch('declineLeave', emp.employeeId)">
+                    <button
+                      class="btn btn-warning"
+                      @click="$store.dispatch('declineLeave', day.leave_request_id)"
+                    >
                       Decline Leave
                     </button>
                   </div>
-
                 </li>
               </ul>
             </div>

@@ -1,5 +1,5 @@
 <script>
-    import store from '@/store';
+    // import store from '@/store';
     import CreateEmployee from './CreateEmployee.vue';
     
     export default {
@@ -8,17 +8,22 @@
         },
         data(){
             return{
-                workers: store.state.employees,
+                // workers: store.state.employees,
                 selectedEmployee: null
             }
         },
         methods:{
-            showAllEmployeeDetails(employeeId){
-               this.selectedEmployee = this.workers.find(worker => worker.employeeId === employeeId)
+            showAllEmployeeDetails(employee_Id){
+               this.selectedEmployee = this.workers.find(worker => worker.employee_Id === employee_Id)
             },
             hideSelectedEmployeeDetails(){
                 this.selectedEmployee = null
             }
+        },
+        computed:{
+          workers(){
+            return this.$store.state.employees
+          }
         }
     }
 </script>
@@ -27,7 +32,7 @@
 
     <CreateEmployee/>
     <div class="cards">
-        <div class="employee mb-2 border-top pt-3" v-for="employee in workers" :key="employee.employeeId" @click="showAllEmployeeDetails(employee.employeeId)">
+        <div class="employee mb-2 border-top pt-3" v-for="employee in this.$store.state.employees" :key="employee.employee_Id" @click="showAllEmployeeDetails(employee.employee_Id)">
             <div class="d-flex">
                 <i class="fa-solid fa-user-tie mr-2"></i> 
                 <div class="nameNposition mr-6">
@@ -40,7 +45,7 @@
                 <p class="btn departments right-0">{{ employee.department }}</p>
             </div>
             <div
-                v-if="selectedEmployee && selectedEmployee.employeeId === employee.employeeId"
+                v-if="selectedEmployee && selectedEmployee.employee_Id === employee.employee_Id"
                 class="popup"
                 @click.stop="hideSelectedEmployeeDetails()"
                 >

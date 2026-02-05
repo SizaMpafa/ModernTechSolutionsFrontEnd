@@ -1,111 +1,103 @@
 import { createStore } from "vuex";
-import employeesData from "./employee_info.json";
-import attendanceData from "./attendance.json";
-import payrollData from "./payroll_data.json";
-
-// Always load from localStorage if available
-function loadAttendance() {
-  const saved = localStorage.getItem("employeesAttendance");
-  return saved ? JSON.parse(saved) : attendanceData.attendanceAndLeave;
-}
-
-function normalizeIds(attendance) {
-  return attendance.map(e => ({
-    ...e,
-    employeeId: Number(e.employeeId)
-  }));
-}
-
 
 export default createStore({
   state: {
-  employees: JSON.parse(localStorage.getItem("employees")) || employeesData.employeeInformation,
-  employeesAttendance: normalizeIds(loadAttendance()),
-  employeesPayRoll: payrollData.payrollData,
-},
-
+    employees: [],
+    attendance: [],
+    leaveRequests: []
+  },
 
   getters: {
-    hasSignedToday: (state) => (id) => {
-      const employee = state.employeesAttendance.find((e) => e.employeeId == id);
-      if (!employee) return false;
+    employeesAttendanceCombined(state) {
+        return state.employees.map(emp => ({
+          employeeId: emp.employee_Id,
+          name: emp.name,
 
-      const today = new Date().toISOString().split("T")[0];
-      return employee.attendance.some(a => a.date === today);
-    }
+          attendance: state.attendance
+            ?.filter(a => a.employee_id === emp.employee_Id)
+            .map(a => ({
+              date: a.attendance_date,
+              attendance_status: a.attendance_status
+            })) || [],
+
+          leaveRequests: state.leaveRequests
+            ?.filter(l => l.employee_id === emp.employee_Id)
+            .map(l => ({
+              date: l.date,
+              status: l.status,
+              reason: l.reason
+            })) || []
+        }));
+      }
   },
 
   mutations: {
-    // Save both to Vuex AND localStorage
-    saveAttendance(state) {
-      localStorage.setItem(
-        "employeesAttendance",
-        JSON.stringify(state.employeesAttendance)
+    setEmployees(state, payload) {
+      state.employees = payload;
+    },
+    setAttendance(state, payload) {
+      state.attendance = payload;
+    },
+    setLeaveRequests(state, payload) {
+      state.leaveRequests = payload;
+    },
+    updateLeaveStatus(state, { leave_request_id, status }) {
+      const leave = state.leaveRequests.find(
+        l => l.leave_request_id === leave_request_id
       );
-    },
-
-    addRegister(state, payload) {
-      const { id, newAttendanceRecord } = payload;
-      const employee = state.employeesAttendance.find(e => e.employeeId == id);
-
-      if (employee) {
-        employee.attendance.push(newAttendanceRecord);
-
-        // sync Vuex + LocalStorage
-        this.commit("saveAttendance");
-      }
-    },
-
-    addRequest(state, payload) {
-      const { id, newLeaveRequestRecord } = payload;
-      const employee = state.employeesAttendance.find(e => e.employeeId == id);
-
-      if (employee) {
-        employee.leaveRequests.push(newLeaveRequestRecord);
-
-        // sync Vuex + LocalStorage
-        this.commit("saveAttendance");
-      }
-    },
-
-    updateLeaveStatus(state, { employeeId, newStatus }) {
-      const employee = state.employeesAttendance.find(e => e.employeeId === employeeId);
-      if (!employee) return;
-
-      employee.leaveRequests.forEach(req => {
-        if (req.status === "Pending") {
-          req.status = newStatus; // "Approved" or "Declined"
-        }
-      });
-
-      // sync Vuex + LocalStorage
-      this.commit("saveAttendance");
-    },
-    addEmployee(state, newEmployee) {
-      newEmployee.employeeId = Number(newEmployee.employeeId);
-
-      state.employees.push(newEmployee);
-      localStorage.setItem("employees", JSON.stringify(state.employees));
-
-      state.employeesAttendance.push({
-        employeeId: newEmployee.employeeId,
-        attendance: [],
-        leaveRequests: []
-      });
-
-      localStorage.setItem("employeesAttendance",
-        JSON.stringify(state.employeesAttendance)
-      );
+      if (leave) leave.status = status;
     }
-
   },
 
   actions: {
-    approveLeave({ commit }, employeeId) {
-      commit("updateLeaveStatus", { employeeId, newStatus: "Approved" });
+    async fetchEmployees({ commit }) {
+      const { employees } =
+        await (await fetch("http://localhost:1111/employees")).json();
+      commit("setEmployees", employees);
     },
-    declineLeave({ commit }, employeeId) {
-      commit("updateLeaveStatus", { employeeId, newStatus: "Declined" });
+
+    async fetchAttendance({ commit }) {
+      const { attendance } =
+        await (await fetch("http://localhost:1111/attendance")).json();
+      commit("setAttendance", attendance);
+    },
+
+    async fetchLeaveRequests({ commit }) {
+      const response =
+        await (await fetch("http://localhost:1111/leave_requests")).json();
+
+      // BACKEND KEY IS `leave_request`
+      commit("setLeaveRequests", response.leave_request);
+    },
+
+    async approveLeave({ commit }, leave_request_id) {
+      await fetch(
+        `http://localhost:1111/employee/leave_request/${leave_request_id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Approved" })
+        }
+      );
+      commit("updateLeaveStatus", {
+        leave_request_id,
+        status: "Approved"
+      });
+    },
+
+    async declineLeave({ commit }, leave_request_id) {
+      await fetch(
+        `http://localhost:1111/employee/leave_request/${leave_request_id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Declined" })
+        }
+      );
+      commit("updateLeaveStatus", {
+        leave_request_id,
+        status: "Declined"
+      });
     }
   }
 });

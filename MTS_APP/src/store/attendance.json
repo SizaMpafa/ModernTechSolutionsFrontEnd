@@ -1,43 +1,6 @@
 {
     "attendanceAndLeave": [
-        {
-            "employeeId": 1,
-            "name": "Sibongile Nkosi",
-            "attendance": [
-                {
-                    "date": "2025-07-25",
-                    "status": "Present"
-                },
-                {
-                    "date": "2025-07-26",
-                    "status": "Absent"
-                },
-                {
-                    "date": "2025-07-27",
-                    "status": "Present"
-                },
-                {
-                    "date": "2025-07-28",
-                    "status": "Present"
-                },
-                {
-                    "date": "2025-07-29",
-                    "status": "Present"
-                }
-            ],
-            "leaveRequests": [
-                {
-                    "date": "2025-07-22",
-                    "reason": "Sick Leave",
-                    "status": "Approved"
-                },
-                {
-                    "date": "2024-12-01",
-                    "reason": "Personal",
-                    "status": "Pending"
-                }
-            ]
-        },
+         
         {
             "employeeId": 2,
             "name": "Lungile Moyo",
