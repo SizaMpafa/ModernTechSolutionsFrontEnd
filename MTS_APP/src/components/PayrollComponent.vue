@@ -7,15 +7,15 @@
   class="employee-card"
   v-for="payroll in payrollWithNames"
   :key="payroll.employeeId"
-  @click="showAllEmployeeDetails(payroll.employeeId)"
+  @click="showAllEmployeeDetails(payroll.employee_id)"
 >
   <div class="card-content">
     <i class="fa-solid fa-user-tie icon"></i>
     <div class="details">
       <h6 class="employee-name">Employee: {{ payroll.name }}</h6>
-      <p class="hours-worked">Hours Worked: {{ payroll.hoursWorked }}</p>
-      <p class="leave-deductions">Leave Deductions: {{ payroll.leaveDeductions }}</p>
-      <p class="final-salary">Final Salary: R{{ payroll.finalSalary }}</p>
+      <p class="hours-worked">Hours Worked: {{ payroll.hours_worked }}</p>
+      <p class="leave-deductions">Leave Deductions: {{ payroll.leave_deductions }}</p>
+      <p class="final-salary">Final Salary: R{{ payroll.final_salary }}</p>
     </div>
   </div>
 </div>
@@ -29,9 +29,9 @@
         <h4>Employee Details</h4>
         <div class="employee-details">
           <p><strong>Employee:</strong> {{ selectedEmployee.name }}</p>
-          <p><strong>Hours Worked:</strong> {{ selectedEmployee.hoursWorked }}</p>
-          <p><strong>Leave Deductions:</strong> {{ selectedEmployee.leaveDeductions }}</p>
-          <p><strong>Final Salary:</strong> R{{ selectedEmployee.finalSalary }}</p>
+          <p><strong>Hours Worked:</strong> {{ selectedEmployee.hours_worked }}</p>
+          <p><strong>Leave Deductions:</strong> {{ selectedEmployee.leave_deductions }}</p>
+          <p><strong>Final Salary:</strong> R{{ selectedEmployee.final_salary }}</p>
           <p v-if="selectedEmployee.salary"><strong>Monthly Salary:</strong> R{{ selectedEmployee.salary }}</p>
           <!-- Add calculated working rate and deduction rate based on above info -->
           <p><strong>Working Rate (per hour):</strong> R350</p>
@@ -94,7 +94,7 @@ export default {
       doc.setFontSize(18);
       doc.text("Payslip", 105, 20, { align: "center" });
 
-      doc.save(`Payslip_${employee.employeeId}.pdf`);
+      doc.save(`Payslip_${employee.employee_id}.pdf`);
     }
 },
   computed: {
