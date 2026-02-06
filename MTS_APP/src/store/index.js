@@ -69,6 +69,41 @@ export default createStore({
       commit("setEmployees", employees);
     },
 
+    async createEmployee({ commit }, employeeData) {
+      const res = await fetch("http://localhost:1111/employees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(employeeData)
+      });
+
+      const { employees } = await res.json();
+      commit("setEmployees", employees);
+    },
+
+    async updateEmployee({ commit }, { employee_Id, updates }) {
+      const res = await fetch(
+        `http://localhost:1111/employees/${employee_Id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updates)
+        }
+      );
+
+      const { employees } = await res.json();
+      commit("setEmployees", employees);
+    },
+
+    async deleteEmployee({ commit }, employee_Id) {
+      const res = await fetch(
+        `http://localhost:1111/employees/${employee_Id}`,
+        { method: "DELETE" }
+      );
+
+      const { employees } = await res.json();
+      commit("setEmployees", employees);
+    },
+
     async fetchAttendance({ commit }) {
       const { attendance } =
         await (await fetch("http://localhost:1111/attendance")).json();

@@ -1,62 +1,56 @@
 <script>
-import store from '@/store';
-
-export default {
-  data() {
-    return {
-      name: "",
-      position: "",
-      salary: "",
-      department: "",
-      employmentHistory: "",
-      contact: "",
-      showModal: false, // <-- reactive modal toggle
-      departments: [...new Set(store.state.employees.map(e => e.department))]
-    };
-  },
-  computed: {
-    nextEmployeeId() {
-      const employees = store.state.employees;
-      if (!employees.length) return 1;
-      return Math.max(...employees.map(e => e.employeeId)) + 1;
-    }
-  },
-  methods: {
-    openModal() {
-      this.showModal = true;
-    },
-    closeModal() {
-      this.showModal = false;
-    },
-    generateEmail(name) {
-      return `${name.toLowerCase().replace(/\s+/g, '.')}@moderntech.com`;
-    },
-    createEmployee() {
-      const newEmployee = {
-        employeeId: this.nextEmployeeId,
-        name: this.name,
-        position: this.position,
-        salary: this.salary,
-        department: this.department,
-        employmentHistory: this.employmentHistory,
-        contact: this.generateEmail(this.name)
+  export default {
+    data() {
+      return {
+        name: "",
+        position: "",
+        salary: "",
+        department: "",
+        employmentHistory: "",
+        showModal: false
       };
+    },
 
-      store.commit('addEmployee', newEmployee);
+    computed: {
+      departments() {
+        return [...new Set(this.$store.state.employees.map(e => e.department))];
+      }
+    },
 
-      // Reset form
-      this.name = '';
-      this.position = '';
-      this.salary = '';
-      this.department = '';
-      this.employmentHistory = '';
+    methods: {
+      openModal() {
+        this.showModal = true;
+      },
+      closeModal() {
+        this.showModal = false;
+      },
+      generateEmail(name) {
+        return `${name.toLowerCase().replace(/\s+/g, ".")}@moderntech.com`;
+      },
 
-      // Hide modal after creation
-      this.closeModal();
+      async createEmployee() {
+        await this.$store.dispatch("createEmployee", {
+          name: this.name,
+          position: this.position,
+          department: this.department,
+          salary: Number(this.salary),
+          employmentHistory: this.employmentHistory,
+          contact: this.generateEmail(this.name)
+        });
+
+        // Reset
+        this.name = "";
+        this.position = "";
+        this.salary = "";
+        this.department = "";
+        this.employmentHistory = "";
+
+        this.closeModal();
+      }
     }
-  }
-};
+  };
 </script>
+
 
 <template>
   <!-- New Employee Button -->
