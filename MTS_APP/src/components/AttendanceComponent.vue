@@ -121,7 +121,7 @@ export default {
       <div class="cards">
         <h1 class="text-center">Pending Leave</h1>
         <div class="showAttendance">
-          <div class="card" v-for="emp in pendingLeave" :key="emp.employeeId">
+          <div class="card" v-for="emp in pendingLeave" :key="emp.employee_Id">
             <h5 class="card-header color-yellow">{{ emp.name }}</h5>
             <div class="card-body">
               <h6>Leave Days:</h6>
@@ -133,14 +133,22 @@ export default {
                   <div class="btn-container">
                     <button
                       class="btn btn-primary"
-                      @click="$store.dispatch('approveLeave', day.leave_request_id)"
+                      @click="$store.dispatch('approveLeave', {
+                        leave_request_id: day.leave_request_id,
+                        employee_id: day.employee_id
+                      })"
+
                     >
                       Approve Leave
                     </button>
 
                     <button
                       class="btn btn-warning"
-                      @click="$store.dispatch('declineLeave', day.leave_request_id)"
+                      @click="$store.dispatch('declineLeave', {
+                        leave_request_id: day.leave_request_id,
+                        employee_id: day.employee_id
+                      })"
+
                     >
                       Decline Leave
                     </button>

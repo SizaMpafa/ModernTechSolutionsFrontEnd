@@ -21,13 +21,16 @@ export default createStore({
               attendance_status: a.attendance_status
             })) || [],
 
-          leaveRequests: state.leaveRequests
-            ?.filter(l => l.employee_id === emp.employee_Id)
-            .map(l => ({
-              date: l.date,
-              status: l.status,
-              reason: l.reason
-            })) || []
+            leaveRequests: state.leaveRequests
+              ?.filter(l => l.employee_id === emp.employee_Id)
+              .map(l => ({
+                leave_request_id: l.leave_request_id,
+                employee_id: l.employee_id,
+                date: l.date,
+                status: l.status,
+                reason: l.reason
+              })) || []
+
         }));
       }
   },
@@ -45,12 +48,18 @@ export default createStore({
     setPayroll(state, payload) {
       state.payroll = payload;
     },
-    updateLeaveStatus(state, { leave_request_id, status }) {
+    updateLeaveStatus(state, { leave_request_id, status, employee_id }) {
       const leave = state.leaveRequests.find(
-        l => l.leave_request_id === leave_request_id
+        l =>
+          l.leave_request_id === leave_request_id &&
+          l.employee_id === employee_id
       );
-      if (leave) leave.status = status;
+
+      if (leave) {
+        leave.status = status;
+      }
     }
+
   },
 
   actions: {
@@ -83,24 +92,26 @@ export default createStore({
 
 
 
-    async approveLeave({ commit }, leave_request_id) {
+    async approveLeave({ commit }, { leave_request_id, employee_id }) {
       await fetch(
-        `http://localhost:1111/employee/leave_request/${leave_request_id}`,
+        `http://localhost:1111/employee/${employee_id}/leave_request/${leave_request_id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status: "Approved" })
         }
       );
+
       commit("updateLeaveStatus", {
         leave_request_id,
+        employee_id,
         status: "Approved"
       });
     },
 
-    async declineLeave({ commit }, leave_request_id) {
+    async declineLeave({ commit }, { leave_request_id, employee_id }) {
       await fetch(
-        `http://localhost:1111/employee/leave_request/${leave_request_id}`,
+        `http://localhost:1111/employee/${employee_id}/leave_request/${leave_request_id}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -109,6 +120,7 @@ export default createStore({
       );
       commit("updateLeaveStatus", {
         leave_request_id,
+        employee_id,
         status: "Declined"
       });
     }
